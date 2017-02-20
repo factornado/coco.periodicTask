@@ -20,7 +20,7 @@ db:
     mongo:
         host:
             host01:
-                address: 'sofia.connected.dmz'
+                address: 'localhost:27017'
         database:
             db01:
                 host: host01
