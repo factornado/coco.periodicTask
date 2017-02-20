@@ -42,6 +42,42 @@
                 ]
             },
         {
+            "path": "\/COCO_SERVICE_NAME\/todo",
+            "operations": [
+                {
+                    "notes": "Update the list of tasks to be done.",
+                    "method": "POST",
+                    "responseMessages": [
+                        {"message": "OK", "code": 200},
+                        {"message": "Unauthorized", "code": 401},
+                        {"message": "Forbidden", "code": 403},
+                        {"message": "Not Found", "code": 404}
+                        ],
+                    "deprecated": false,
+                    "produces": ["application\/json"],
+                    "parameters": []
+                    }
+                ]
+            },
+        {
+            "path": "\/COCO_SERVICE_NAME\/do",
+            "operations": [
+                {
+                    "notes": "Pick one task and do it.",
+                    "method": "POST",
+                    "responseMessages": [
+                        {"message": "OK", "code": 200},
+                        {"message": "Unauthorized", "code": 401},
+                        {"message": "Forbidden", "code": 403},
+                        {"message": "Not Found", "code": 404}
+                        ],
+                    "deprecated": false,
+                    "produces": ["application\/json"],
+                    "parameters": []
+                    }
+                ]
+            },
+        {
             "path": "\/COCO_SERVICE_NAME\/{uri}",
             "operations": [
                 {
