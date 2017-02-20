@@ -11,7 +11,7 @@ from do import do
 config = Config('config.yml')
 
 logging.basicConfig(
-    level=20,  # Set to 20 for diasabling the debug logs.
+    level=20,  # Set to 10 for debug logs.
     filename=config.conf['log']['file'],
     format='%(asctime)s (%(filename)s:%(lineno)s)- %(levelname)s - %(message)s',
     )

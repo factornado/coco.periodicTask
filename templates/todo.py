@@ -1,8 +1,7 @@
 import logging
 from tornado import web, escape
-import pandas as pd
-import bson
 import numpy as np
+
 
 def todo(config):
     nb_created_tasks = 0
@@ -39,14 +38,11 @@ def todo(config):
         if r.status_code != 200:
             break
         task = r.json()
-        
+
         # Do something with the task.
-        data = task['data']
-        
         for number in range(3):
             for letter in ['A', 'B']:
                 if np.random.uniform() < 0.5:
-                    task_value = [letter, str(number)]
                     task_key = escape.url_escape('{}/{}'.format(escape.url_escape(letter),
                                                                 escape.url_escape(str(number))))
                     logging.debug('Set task {}'.format(task_key))
@@ -75,7 +71,8 @@ def todo(config):
         data={},
         )
 
-    log_str = 'Finished scanning for new tasks. Found {} in {} loops.'.format(nb_created_tasks, nb_loops)
+    log_str = 'Finished scanning for new tasks. Found {} in {} loops.'.format(
+        nb_created_tasks, nb_loops)
     if nb_created_tasks > 0:
         logging.info(log_str)
     else:

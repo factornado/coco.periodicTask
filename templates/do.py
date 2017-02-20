@@ -1,4 +1,3 @@
-import os
 import logging
 from tornado import escape
 
