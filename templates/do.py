@@ -4,7 +4,7 @@ from tornado import escape
 
 def do(config):
     # Get a task and parse it.
-    r = config.services.tasks.tasks.get(task=config.conf['tasks']['do'])
+    r = config.services.tasks.assignOne.put(task=config.conf['tasks']['do'])
     if r.status_code != 200:
         return {'nb': 0, 'code': r.status_code, 'reason': r.reason, 'ok': False}
 
@@ -19,11 +19,11 @@ def do(config):
         out = do_something(task_values, config)
 
         # Set the task as `done`.
-        config.services.tasks.tasks.put(
+        config.services.tasks.action.put(
             task=config.conf['tasks']['do'],
             key=escape.url_escape(task_key),
-            status='done',
-            lastPost=task['lastPost'],
+            action='success',
+            data={},
             )
         return {
             'nb': out['nb'],
@@ -33,11 +33,11 @@ def do(config):
             }
     except Exception as e:
         # Set the task as `fail`.
-        config.services.tasks.tasks.put(
+        config.services.tasks.action.put(
             task=config.conf['tasks']['do'],
             key=escape.url_escape(task_key),
-            status='fail',
-            lastPost=task['lastPost'],
+            action='error',
+            data={},
             )
         return {'nb': 1,
                 'taskValues': list(task_values),

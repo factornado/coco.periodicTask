@@ -42,25 +42,18 @@ class Config(object):
         self.mongo = Kwargs()
         _mongo = self.conf.get('db', {}).get('mongo', {})
         self.mongo = Kwargs(**{
-            hostname: Kwargs(**{
-                dbname: Kwargs(**{
-                    collname: pymongo.MongoClient(
-                        host['address'],
-                        connect=False)[db['name']][coll['name']]
-                    for collname, coll in _mongo.get('collection', {}).items()
-                    if coll['database'] == dbname
-                    })
-                for dbname, db in _mongo.get('database', {}).items()
-                if db['host'] == hostname
-                })
+            collname: pymongo.MongoClient(host['address'],
+                                          connect=False)[db['name']][coll['name']]
             for hostname, host in _mongo.get('host', {}).items()
+            for dbname, db in _mongo.get('database', {}).items() if db['host'] == hostname
+            for collname, coll in _mongo.get('collection', {}).items() if coll['database'] == dbname
             })
         self.services = Kwargs(**{
             key: Kwargs(**{
                 subkey: Kwargs(**{
                     subsubkey: WebMethod(
                         subsubkey,
-                        self.conf['registry']['url']+key+subsubval,
+                        self.conf['registry']['url'].rstrip('/')+subsubval,
                         )
                     for subsubkey, subsubval in subval.items()})
                 for subkey, subval in val.items()

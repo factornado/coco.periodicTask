@@ -10,11 +10,11 @@ registry:
 
 threads_nb: 4                          # The number of threads that the server will have. Must be greater than do_threads_nb
 
-do_threads_nb: 2                       # The number of `do` threads that will run simultaneously.
+do_threads_nb: 0                       # The number of `do` threads that will run simultaneously.
 do_sleep_duration: 6                   # The sleep period after the todo callback has run for nothing (in sec).
 do_callback_period: 1                  # The period between two callback run (in sec).
 
-todo_threads_nb: 1                     # The number of `todo` threads that will run simultaneously.
+todo_threads_nb: 0                     # The number of `todo` threads that will run simultaneously.
 todo_sleep_duration: 60                # The sleep period after the todo callback has run for nothing (in sec).
 todo_callback_period: 10               # The period between two callback run (in sec).
 
@@ -36,10 +36,12 @@ db:
 
 services:
     tasks:
-        tasks:
-            get: /tasks/{task}
-            post: /tasks/{task}/{key}
-            put: /tasks/{task}/{key}/{status}/{lastPost}
+        action:
+            put: /tasks-v1/action/{task}/{key}/{action}
+        assignOne:
+            put: /tasks-v1/assignOne/{task}
+        getByKey:
+            get: /tasks-v1/getByKey/{task}/{key}
 
 tasks:
     todo: todo-COCO_SERVICE_NAME
