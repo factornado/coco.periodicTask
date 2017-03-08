@@ -11,7 +11,7 @@ from do import do
 config = Config('config.yml')
 
 logging.basicConfig(
-    level=20,  # Set to 10 for debug logs.
+    level=config.conf['log']['level'],
     filename=config.conf['log']['file'],
     format='%(asctime)s (%(filename)s:%(lineno)s)- %(levelname)s - %(message)s',
     )
@@ -80,15 +80,18 @@ if __name__ == '__main__':
         server.start(config.conf['threads_nb'])
         ioloop.IOLoop.current().start()
     elif os.fork():
-        process.fork_processes(config.conf['do_threads_nb'])
-        ioloop.PeriodicCallback(config.do_callback,
-                                config.conf['do_callback_period']*1000).start()
-        ioloop.IOLoop.instance().start()
+        if config.conf['do_threads_nb']:
+            process.fork_processes(config.conf['do_threads_nb'])
+            ioloop.PeriodicCallback(config.do_callback,
+                                    config.conf['do_callback_period']*1000).start()
+            ioloop.IOLoop.instance().start()
     elif os.fork():
-        ioloop.PeriodicCallback(config.todo_callback,
-                                config.conf['todo_callback_period']*1000).start()
-        ioloop.IOLoop.instance().start()
+        if config.conf['todo_threads_nb']:
+            process.fork_processes(config.conf['todo_threads_nb'])
+            ioloop.PeriodicCallback(config.todo_callback,
+                                    config.conf['todo_callback_period']*1000).start()
+            ioloop.IOLoop.instance().start()
     else:
         ioloop.PeriodicCallback(config.heartbeat,
-                                config.conf['heartbeat']['period']*1000).start()
+                                config.conf['heartbeat_period']*1000).start()
         ioloop.IOLoop.instance().start()

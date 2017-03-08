@@ -60,7 +60,7 @@ class Config(object):
                 subkey: Kwargs(**{
                     subsubkey: WebMethod(
                         subsubkey,
-                        self.conf['heartbeat']['url']+key+subsubval,
+                        self.conf['registry']['url']+key+subsubval,
                         )
                     for subsubkey, subsubval in subval.items()})
                 for subkey, subval in val.items()
@@ -88,7 +88,7 @@ class Config(object):
     def register(self):
         request = httpclient.HTTPRequest(
             '{}/register/{}'.format(
-                self.conf['heartbeat']['url'].rstrip('/'),
+                self.conf['registry']['url'].rstrip('/'),
                 self.conf['name'],
                 ),
             method='POST',
