@@ -1,97 +1,49 @@
-import os
-import time
-import json
-from tornado import ioloop, web, httpserver, process
-import logging
-
-from utils import Config
-from todo import todo
-from do import do
-
-config = Config('config.yml')
-
-logging.basicConfig(
-    level=config.conf['log']['level'],
-    filename=config.conf['log']['file'],
-    format='%(asctime)s (%(filename)s:%(lineno)s)- %(levelname)s - %(message)s',
-    )
-logging.Formatter.converter = time.gmtime
-logging.getLogger('requests').setLevel(logging.WARNING)
-logging.getLogger('tornado').setLevel(logging.WARNING)
-logging.info('='*80)
+import factornado
+from tornado import web
 
 
-class Info(web.RequestHandler):
+class HelloWorld(web.RequestHandler):
+    swagger = {
+        "path": "/{name}/{uri}",
+        "operations": [
+            {
+                "notes": "Return hello world.",
+                "method": "GET",
+                "responseMessages": [
+                    {"message": "OK", "code": 200},
+                    {"message": "Unauthorized", "code": 401},
+                    {"message": "Forbidden", "code": 403},
+                    {"message": "Not Found", "code": 404}
+                    ],
+                "deprecated": False,
+                "produces": ["application/json"],
+                "parameters": []
+                }
+            ]}
+    nb = 0
+
     def get(self):
-        self.write(config.conf)
+        self.write('Hello world nb {}'.format(self.nb))
+        self.nb += 1
 
 
-class Heartbeat(web.RequestHandler):
-    def get(self):
-        config.register()
-        self.write("ok")
+class Todo(factornado.Todo):
+    def todo_loop(self, data):
+        for k in range(2):
+            data['nb'] += 1
+            yield 'ABCDE'[data['nb'] % 5], {}
 
 
-class Todo(web.RequestHandler):
-    def initialize(self, config=None):
-        assert config is not None
-        self.config = config
-
-    def post(self):
-        out = todo(self.config)
-        self.write(json.dumps(out))
+class Do(factornado.Do):
+    def do_something(self, task_key, task_data):
+        return 'something'
 
 
-class Do(web.RequestHandler):
-    def initialize(self, config=None):
-        assert config is not None
-        self.config = config
-
-    def post(self):
-        out = do(self.config)
-        self.write(json.dumps(out))
-
-
-class SomeHandler(web.RequestHandler):
-    def get(self, param=''):
-        self.write(
-            "Hello from service {}. "
-            "You've asked for uri {}\n".format(
-                config.conf['name'], param))
-
-app = web.Application([
-    ("/(swagger.json)", web.StaticFileHandler, {'path': os.path.dirname(__file__)}),
-    ("/swagger", web.RedirectHandler, {'url': '/swagger.json'}),
-    ("/heartbeat", Heartbeat),
-    ("/info", Info),
-    ("/todo", Todo, {'config': config}),
-    ("/do", Do, {'config': config}),
-    ("/(.*)", SomeHandler),
-    ])
+app = factornado.Application('config.yml', [
+    ("/hello", HelloWorld),
+    ("/todo", Todo),
+    ("/do", Do),
+    ], )
 
 if __name__ == '__main__':
-    port = config.get_port()  # We need to have a fixed port in both forks.
-    logging.info('Listening on port {}'.format(port))
-    time.sleep(2)  # We sleep for a few seconds to let the registry start.
-    if os.fork():
-        config.register()
-        server = httpserver.HTTPServer(app)
-        server.bind(config.get_port(), address='0.0.0.0')
-        server.start(config.conf['threads_nb'])
-        ioloop.IOLoop.current().start()
-    elif os.fork():
-        if config.conf['do_threads_nb']:
-            process.fork_processes(config.conf['do_threads_nb'])
-            ioloop.PeriodicCallback(config.do_callback,
-                                    config.conf['do_callback_period']*1000).start()
-            ioloop.IOLoop.instance().start()
-    elif os.fork():
-        if config.conf['todo_threads_nb']:
-            process.fork_processes(config.conf['todo_threads_nb'])
-            ioloop.PeriodicCallback(config.todo_callback,
-                                    config.conf['todo_callback_period']*1000).start()
-            ioloop.IOLoop.instance().start()
-    else:
-        ioloop.PeriodicCallback(config.heartbeat,
-                                config.conf['heartbeat_period']*1000).start()
-        ioloop.IOLoop.instance().start()
+    app.start_server()

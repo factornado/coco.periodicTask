@@ -1,25 +1,26 @@
 name: COCO_SERVICE_NAME
 version: COCO_SERVICE_VERSION
-
 log:
     file: /tmp/COCO_SERVICE_NAME.log
-    level: 20  # Set to 10 for debug logs.
-
+    level: 10  # Set to 10 for debug logs.
 registry:
     url: http://localhost:8800/
-
-threads_nb: 4                          # The number of threads that the server will have. Must be greater than do_threads_nb
-
-do_threads_nb: 0                       # The number of `do` threads that will run simultaneously.
-do_sleep_duration: 6                   # The sleep period after the todo callback has run for nothing (in sec).
-do_callback_period: 1                  # The period between two callback run (in sec).
-
-todo_threads_nb: 0                     # The number of `todo` threads that will run simultaneously.
-todo_sleep_duration: 60                # The sleep period after the todo callback has run for nothing (in sec).
-todo_callback_period: 10               # The period between two callback run (in sec).
-
-heartbeat_period: 30                   # The period between two heatbeat callback (in sec).
-
+threads_nb: 4         # The number of threads that the server will have. Must be greater than do_threads_nb
+callbacks:
+    heartbeat:
+        threads: 1
+        uri: /heartbeat
+        period: 30
+    todo:
+        threads: 0    # Nb of threads
+        uri: /todo    # The URI to call
+        period: 5     # The callback period (in sec)
+        sleep: 10     # If return is not 200, sleep for .... (in sec)
+    do:
+        threads: 0    # Nb of threads
+        uri: /do    # The URI to call
+        period: 5     # The callback period (in sec)
+        sleep: 10     # If return is not 200, sleep for .... (in sec)
 db:
     mongo:
         host:
@@ -33,7 +34,6 @@ db:
             coll01:
                 database: db01
                 name: coll01
-
 services:
     tasks:
         action:
@@ -42,7 +42,6 @@ services:
             put: /tasks-v1/assignOne/{task}
         getByKey:
             get: /tasks-v1/getByKey/{task}/{key}
-
 tasks:
     todo: todo-COCO_SERVICE_NAME
     do: COCO_SERVICE_NAME
